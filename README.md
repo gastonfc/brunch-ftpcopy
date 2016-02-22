@@ -1,18 +1,34 @@
 ## ftpcopy-brunch
-Adds ftp transfers support to
-[brunch](http://brunch.io).
+
+[brunch](http://brunch.io) plugin to upload the modified files after a build to a ftp server.
 
 ## Usage
 
 **This plugin is in development and it is not ready to use!**
 
-Install the plugin via npm with `npm install --save ftpcopy-brunch`.
+* Add `"ftpcopy-brunch": "gastonfc/ftpcopy-brunch"` to `package.json` of your brunch app.
 
-Or, do manual install:
+## Options
 
-* Add `"ftpcopy-brunch": "~x.y.z"` to `package.json` of your brunch app.
-* If you want to use git version of plugin, use the GitHub URI
-`"ftpcopy-brunch": "brunch/ftpcopy-brunch"`.
+    plugins:
+        ftpcopy:
+            host: '192.168.23.24',
+            port: 50021,
+            user: 'ubuntu',
+            password: 'mypassword123',
+            basePath: 'public/',
+            remoteBasePath: '/home/ubuntu/.www/myapp'
+
+* **host**: ftp server domain or IP.
+* **port**: ftp server port. If omitted the default port is used.
+* **user**: user to authenticate.
+* **password**: password to authenticate.
+* **basePath**: root of the files to be uploaded.
+* **remoteBasePath**: destination path
+
+With this example config if `public/index.html` and `public/js/app.js`
+are built, they are uploaded as `/home/ubuntu/.www/myapp/index.html` and
+`/home/ubuntu/.www/myapp/js/app.js`.
 
 ## License
 
@@ -37,3 +53,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+## TODO
+
+Read configuration from external file instead of brunch's config.

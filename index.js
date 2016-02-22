@@ -27,7 +27,7 @@ function filesToUpload(files, assets, baseDir) {
 // https://github.com/brunch/brunch/blob/master/docs/plugins.md
 
 // Remove everything your plugin doesn't need.
-class BrunchPlugin {
+class FtpcopyPlugin {
   constructor(config) {
     // Replace 'plugin' with your plugin's name;
     this.config = config && config.plugins && config.plugins.ftpcopy;
@@ -103,7 +103,7 @@ class BrunchPlugin {
 }
 
 // Required for all Brunch plugins.
-BrunchPlugin.prototype.brunchPlugin = true;
+FtpcopyPlugin.prototype.brunchPlugin = true;
 
 // Required for compilers, linters & optimizers.
 // 'javascript', 'stylesheet' or 'template'
@@ -117,6 +117,6 @@ BrunchPlugin.prototype.brunchPlugin = true;
 // Indicates which environment a plugin should be applied to.
 // The default value is '*' for usual plugins and
 // 'production' for optimizers.
-BrunchPlugin.prototype.defaultEnv = '*';
+FtpcopyPlugin.prototype.defaultEnv = '*';
 
-module.exports = BrunchPlugin;
+module.exports = FtpcopyPlugin;

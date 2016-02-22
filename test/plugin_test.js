@@ -17,7 +17,7 @@ describe('It is a brunch plugin', function() {
   };
 
   beforeEach(function() {
-    plugin = new Plugin(config);
+    plugin = new FtpcopyPlugin(config);
   });
 
   it('should be an object', function() {
@@ -42,7 +42,7 @@ describe('It is a brunch plugin', function() {
 
   it('should not fail if not server config is provided', function() {
       expect(function () {
-          plugin = new Plugin({});
+          plugin = new FtpcopyPlugin({});
           plugin.onCompile(brunchFiles, []);
       }).to.not.throw(Error);
   });
@@ -74,7 +74,7 @@ describe('OnCompile', function() {
   };
 
   beforeEach(function (done) {
-      plugin = new Plugin(config);
+      plugin = new FtpcopyPlugin(config);
 
       server = fakeServer.create(server_options, done);
   });
@@ -146,7 +146,7 @@ describe('OnCompile', function() {
       var altConfig = clone(config);
       altConfig.plugins.ftpcopy.remoteBasePath = 'uploads';
 
-      plugin = new Plugin(altConfig);
+      plugin = new FtpcopyPlugin(altConfig);
 
       plugin.onCompile(brunchFiles, []);
   });
