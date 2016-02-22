@@ -1,5 +1,14 @@
+'use strict';
+
+var files = ['test/data/client/file1.txt', 'test/data/client/file2.txt', 'test/data/client/more/file3.txt'];
+var brunchFiles = files.map(name => ({ path: name }) );
+var plugin;
+
+function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
 describe('It is a brunch plugin', function() {
-  var plugin;
 
   var config = {
       plugins: {
@@ -31,70 +40,128 @@ describe('It is a brunch plugin', function() {
     expect(plugin.config).to.be.equal(config.plugins.ftpcopy);
   });
 
+  it('should not fail if not server config is provided', function() {
+      expect(function () {
+          plugin = new Plugin({});
+          plugin.onCompile(brunchFiles, []);
+      }).to.not.throw(Error);
+  });
+
 });
 
-describe('Using ftp-client', function() {
-  var plugin;
-  var ftpClientStub;
-  var files = ['file1', 'file2'];
-  var brunchFiles = files.map(name => ({ path: name }) );
+describe('OnCompile', function() {
+  var fakeServer = require('./fake-server');
+  var server;
+
+  const FTP_PORT = 60021;
+  const FTP_HOST = '127.0.0.1';
 
   var config = {
       plugins: {
           ftpcopy : {
-              server: { host: 'localhost' }
+              host: FTP_HOST,
+              port: FTP_PORT,
+              user: 'ftpcopyuser',
+              password: 'secretpassword',
+              basePath: 'test/data/client'
           }
       }
   };
 
-  before(function () {
-      mockery.enable({
-        warnOnReplace: false,
-        warnOnUnregistered: false,
-        useCleanCache: true
+  var server_options = {
+      host: FTP_HOST,
+      port: FTP_PORT
+  };
+
+  beforeEach(function (done) {
+      plugin = new Plugin(config);
+
+      server = fakeServer.create(server_options, done);
+  });
+
+  afterEach(function (done) {
+      server.on('close', done);
+      server.closeAll();
+  });
+
+
+  it('should connect to the server', function(done) {
+      server.on('client:connected', function () { done(); });
+      plugin.onCompile(brunchFiles, []);
+  });
+
+  it('should authenticate with the user provided', function (done) {
+      server.on('client:connected', function(connection) {
+          connection.on('command:user', function(user, success, failure) {
+              expect(user).to.be.equals(config.plugins.ftpcopy.user);
+              success();
+              done();
+          });
+      });
+      plugin.onCompile(brunchFiles, []);
+  });
+
+  it('should authenticate with the password provided', function (done) {
+      server.on('client:connected', function(connection) {
+          connection.on('command:user', function(user, success, failure) {
+              success();
+          });
+          connection.on('command:pass', function(pass, success, failure) {
+              expect(pass).to.be.equals(config.plugins.ftpcopy.password);
+              success();
+              done();
+          });
+      });
+      plugin.onCompile(brunchFiles, []);
+  });
+
+  it('should upload files changed', function (done) {
+      server.defaultConnection();
+
+      server.on('end', function () {
+        expect(server.filesReceived).to.have.length(files.length);
+        done();
+      });
+      plugin.onCompile(brunchFiles, []);
+  });
+
+  it('should use the base path provided', function (done) {
+      server.defaultConnection();
+
+      server.on('end', function () {
+        expect(server.filesReceived).to.have.members(['file1.txt', 'file2.txt', 'more/file3.txt']);
+        done();
+      });
+      plugin.onCompile(brunchFiles, []);
+  });
+
+  it('should use the remote base path if it is provided', function (done) {
+      server.defaultConnection();
+
+      server.on('end', function () {
+        expect(server.filesReceived).to.have.members(['uploads/file1.txt', 'uploads/file2.txt', 'uploads/more/file3.txt']);
+        done();
       });
 
-      ftpClientStub = sinon.stub();
+      var altConfig = clone(config);
+      altConfig.plugins.ftpcopy.remoteBasePath = 'uploads';
 
-      mockery.registerMock('ftp-client', ftpClientStub );
+      plugin = new Plugin(altConfig);
 
-      Plugin = require('..');
+      plugin.onCompile(brunchFiles, []);
   });
 
-  after(function() {
-      mockery.disable();
+  it('should create directories', function (done) {
+      server.defaultConnection();
+
+      server.on('end', function () {
+        expect(server.dirsReceived).to.include('more');
+        done();
+      });
+      plugin.onCompile(brunchFiles, []);
   });
 
-  beforeEach(function() {
-      plugin = new Plugin(config);
-  });
+  it('should apply the folder rules provided');
 
-  it('should create a ftp-client instance', function() {
-      expect(ftpClientStub.called).to.be.true;
-  });
-
-  it('should initialize ftp-client using server configuration', function() {
-      expect(ftpClientStub.calledWith(config.plugins.ftpcopy.server)).to.be.true;
-  });
-
-  it('should connect when onCompile is called', function () {
-
-      plugin.onCompile(brunchFiles);
-
-      expect(ftpClientStub.connect.called).to.be.true;
-  });
-
-  it('should upload files received as arguments when onCompile is called', function () {
-
-      ftpClientStub.connect = function (callback) {
-          callback();
-      };
-      ftpClientStub.upload = sinon.stub();
-
-      plugin.onCompile(brunchFiles);
-
-      expect(ftpClientStub.upload.calledWith(files)).to.be.true;
-
-  });
 
 });
