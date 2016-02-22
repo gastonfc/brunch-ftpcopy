@@ -7,15 +7,19 @@ var fileUtils = require('./lib/file-utils');
 
 // Receives the files and assets brunch's data structures
 // and return a plain array of files
-function filesToUpload(files, assets, baseDir) {
+function filesToUpload(files, assets, baseDir, rules) {
     var filesPaths = files.map(f => f.path);
     var assetsPaths = assets.map(f => f.destinationPath);
 
     var all = filesPaths.concat(assetsPaths);
 
+    if (rules) {
+        all = all.map(f => fileUtils.moveFile(f, rules));
+    }
+
     all = fileUtils.addFolders(all);
 
-    var currentDir = process.cwd();
+    var cuArrentDir = process.cwd();
 
     all = all.map(f => path.join(currentDir, f));
     all = all.filter(f => (f.indexOf(baseDir) === 0) && (baseDir !== f));
@@ -83,10 +87,11 @@ class BrunchPlugin {
     if (ftp) {
         var baseDir = this._baseDir();
         var remoteBaseDir = this.config.remoteBasePath || '/';
+        var moveRules = this.config.move;
 
         ftp.connect(function() {
             ftp.upload(
-                filesToUpload(files, assets, baseDir),
+                filesToUpload(files, assets, baseDir, moveRules),
                 remoteBaseDir,
                 { overwrite: 'all', baseDir: baseDir },
                 function () {

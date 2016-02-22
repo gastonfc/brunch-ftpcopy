@@ -41,3 +41,51 @@ describe('addFolders', function () {
         expect(addFolders(files)).to.have.length(3);
     });
 });
+
+describe('moveFile', function () {
+    var moveFile = fileUtils.moveFile
+
+    it('should do nothing if no rules are provided', function () {
+        expect(moveFile('folder/file.txt')).to.be.equals('folder/file.txt');
+    });
+
+    it('should do nothing if an empty object is provided', function () {
+        expect(moveFile('folder/file.txt', {})).to.be.equals('folder/file.txt');
+    });
+
+    it('should do nothing if the key of the rule doesn\'t match the file', function () {
+        var result = moveFile('folder/file.txt', {
+            'old/': 'new/'
+        });
+        expect(result).to.be.equals('folder/file.txt');
+    });
+
+    it('should replace text if two string are provided as rule', function () {
+        var result = moveFile('folder/file.txt', {
+            'folder/': 'new/'
+        });
+        expect(result).to.be.equals('new/file.txt');
+    });
+
+    it('should replace text just one time', function () {
+        var result = moveFile('folder/a/folder/file.txt', {
+            'folder/': 'new/'
+        });
+        expect(result).to.be.equals('new/a/folder/file.txt');
+    });
+
+    it('should apply just one rule', function () {
+        var result = moveFile('folder/a/folder/file.txt', {
+            'folder/': 'new/',
+            'new/a/': 'b/'
+        });
+        expect(result).to.be.equals('new/a/folder/file.txt');
+    });
+
+    it('should interpret the strings as folders', function () {
+        var result = moveFile('folder1/a/folder/file.txt', {
+            'folder': 'new'
+        });
+        expect(result).to.be.equals('folder1/a/folder/file.txt');
+    });
+});

@@ -161,7 +161,21 @@ describe('OnCompile', function() {
       plugin.onCompile(brunchFiles, []);
   });
 
-  it('should apply the folder rules provided');
+  it('should apply the folder rules provided', function (done) {
+      server.defaultConnection();
+
+      server.on('end', function () {
+        expect(server.filesReceived).to.have.members(['file1.txt', 'file2.txt', 'alt/file3.txt']);
+        done();
+      });
+
+      var altConfig = clone(config);
+      altConfig.plugins.ftpcopy.move = { 'more/': 'alt/' };
+
+      plugin = new Plugin(altConfig);
+
+      plugin.onCompile(brunchFiles, []);
+  });
 
 
 });
