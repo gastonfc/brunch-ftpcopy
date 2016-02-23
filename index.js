@@ -9,15 +9,15 @@ var fileUtils = require('./lib/file-utils');
 // and return a plain array of files
 function filesToUpload(files, assets, baseDir) {
     var filesPaths = files.map(f => f.path);
-    var assetsPaths = assets.map(f => f.destinationPath);
+    var all = filesPaths;
 
-    var all = filesPaths.concat(assetsPaths);
+    if (assets) {
+        let assetsPaths = assets.map(f => f.destinationPath);
+        all = all.concat(assetsPaths);
+    }
 
     all = fileUtils.addFolders(all);
 
-    var currentDir = process.cwd();
-
-    all = all.map(f => path.join(currentDir, f));
     all = all.filter(f => (f.indexOf(baseDir) === 0) && (baseDir !== f));
 
     return all;
@@ -41,15 +41,16 @@ class FtpcopyPlugin {
             user : cfg.user,
             password : cfg.password
         };
-        // let options = { logging: 'debug' };
-        let options = { logging: 'none' };
+        let options = {
+            logging: cfg.debug || 'none' 
+        };
 
         this.ftpClient = new ftpClient(ftpConfig, options);
     }
   }
 
   _baseDir() {
-      return path.join(process.cwd(), (this.config.basePath || ''));
+      return this.config.basePath || path.sep;
   }
 
 

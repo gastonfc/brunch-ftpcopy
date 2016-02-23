@@ -43,7 +43,7 @@ describe('It is a brunch plugin', function() {
   it('should not fail if not server config is provided', function() {
       expect(function () {
           plugin = new FtpcopyPlugin({});
-          plugin.onCompile(brunchFiles, []);
+          plugin.onCompile(brunchFiles);
       }).to.not.throw(Error);
   });
 
@@ -87,7 +87,7 @@ describe('OnCompile', function() {
 
   it('should connect to the server', function(done) {
       server.on('client:connected', function () { done(); });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should authenticate with the user provided', function (done) {
@@ -98,7 +98,7 @@ describe('OnCompile', function() {
               done();
           });
       });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should authenticate with the password provided', function (done) {
@@ -112,7 +112,7 @@ describe('OnCompile', function() {
               done();
           });
       });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should upload files changed', function (done) {
@@ -122,7 +122,7 @@ describe('OnCompile', function() {
         expect(server.filesReceived).to.have.length(files.length);
         done();
       });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should use the base path provided', function (done) {
@@ -132,7 +132,7 @@ describe('OnCompile', function() {
         expect(server.filesReceived).to.have.members(['file1.txt', 'file2.txt', 'more/file3.txt']);
         done();
       });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should use the remote base path if it is provided', function (done) {
@@ -148,7 +148,7 @@ describe('OnCompile', function() {
 
       plugin = new FtpcopyPlugin(altConfig);
 
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should create directories', function (done) {
@@ -158,7 +158,7 @@ describe('OnCompile', function() {
         expect(server.dirsReceived).to.include('more');
         done();
       });
-      plugin.onCompile(brunchFiles, []);
+      plugin.onCompile(brunchFiles);
   });
 
   it('should apply the folder rules provided');
