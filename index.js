@@ -1,7 +1,6 @@
 'use strict';
 
 var ftpClient = require('ftp-client');
-var path = require('path');
 var fileUtils = require('./lib/file-utils');
 
 
@@ -31,6 +30,9 @@ class FtpcopyPlugin {
   constructor(config) {
     // Replace 'plugin' with your plugin's name;
     this.config = config && config.plugins && config.plugins.ftpcopy;
+  }
+
+  _ftpClient() {
 
     let cfg = this.config;
 
@@ -45,12 +47,12 @@ class FtpcopyPlugin {
             logging: cfg.debug || 'none' 
         };
 
-        this.ftpClient = new ftpClient(ftpConfig, options);
+        return new ftpClient(ftpConfig, options);
     }
   }
 
   _baseDir() {
-      return this.config.basePath || path.sep;
+      return this.config.basePath || '/';
   }
 
 
@@ -78,8 +80,8 @@ class FtpcopyPlugin {
   // Executed when each compilation is finished.
   // Examples: Hot-reload (send a websocket push).
   onCompile(files, assets) {
-    var self = this;
-    var ftp = self.ftpClient;
+    
+    var ftp = this._ftpClient();
 
     if (ftp) {
         var baseDir = this._baseDir();
